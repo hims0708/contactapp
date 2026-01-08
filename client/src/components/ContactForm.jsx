@@ -41,7 +41,8 @@ const ContactForm = ({ onContactAdded }) => {
 
         setIsSubmitting(true);
         try {
-            const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+            let baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+            if (baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, -1);
             const response = await axios.post(`${baseUrl}/api/contacts`, formData);
             if (response.status === 201) {
                 setSuccessMessage('Message sent successfully! ✨');
