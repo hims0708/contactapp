@@ -24,9 +24,23 @@ app.get('/', (req, res) => {
 app.use('/api/contacts', contactRoutes);
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/contactapp')
-    .then(() => console.log('MongoDB connected'))
-    .catch(err => console.log('MongoDB connection error:', err));
+const connectDB = async () => {
+    if (mongoose.connection.readyState >= 1) return;
+
+    try {
+        const conn = await mongoose.connect(process.env.MONGODB_URI);
+        console.log(`MongoDB Connected: ${conn.connection.host}`);
+    } catch (err) {
+        console.error('MongoDB connection error details:', err.message);
+        // Don't exit process in serverless, let the request fail
+    }
+};
+
+// Middleware to ensure DB is connected before handling requests
+app.use(async (req, res, next) => {
+    await connectDB();
+    next();
+});
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
